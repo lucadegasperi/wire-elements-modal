@@ -6,6 +6,7 @@ window.LivewireUIModal = () => {
         componentHistory: [],
         modalWidth: null,
         isDirty: false,
+        closeConfirmationText: "Are you sure you want to discard all the changes?",
         getActiveComponentModalAttribute(key) {
             if (this.$wire.get('components')[this.activeComponent] !== undefined) {
                 return this.$wire.get('components')[this.activeComponent]['modalAttributes'][key];
@@ -33,7 +34,7 @@ window.LivewireUIModal = () => {
             }
 
             if (this.isDirty) {
-                setTimeout(() => confirm('Sei sicuro?') ? this.closeModal(force, skipPreviousModals, destroySkipped) : null, 100);
+                setTimeout(() => confirm(this.closeConfirmationText) ? this.closeModal(force, skipPreviousModals, destroySkipped) : null, 100);
                 return;
             } else {
                 this.closeModal(force, skipPreviousModals, destroySkipped);
@@ -128,6 +129,10 @@ window.LivewireUIModal = () => {
 
             Livewire.on('setDirty', (id, value) => {
                 this.isDirty = value;
+            });
+
+            Livewire.on('setCloseConfirmationText',  (id, value) => {
+                this.closeConfirmationText = value;
             });
 
             Livewire.on('closeModal', (force = false, skipPreviousModals = 0, destroySkipped = false) => {

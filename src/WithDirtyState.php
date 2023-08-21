@@ -18,5 +18,6 @@ trait WithDirtyState
     protected function setDirty($value)
     {
         $this->emit('setDirty', self::getName(), $value);
+        $this->emit('setCloseConfirmationText', self::getName(), trans('Are you sure you want to discard all the changes?'));
     }
 }
