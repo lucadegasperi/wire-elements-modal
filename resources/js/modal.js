@@ -157,8 +157,6 @@ window.LivewireUIModal = () => {
         },
         init() {
 
-            console.log('here');
-
             this.modalWidth = this.getActiveComponentModalAttribute('maxWidthClass');
 
             Livewire.on('setDirty', (id, value) => {
