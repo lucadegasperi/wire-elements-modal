@@ -6,6 +6,7 @@ window.LivewireUIModal = () => {
         componentHistory: [],
         modalWidth: null,
         isDirty: false,
+        preventClose: false,
         closeConfirmationText: "Are you sure you want to discard all the changes?",
         getActiveComponentModalAttribute(key) {
             if (this.$wire.get('components')[this.activeComponent] !== undefined) {
@@ -14,7 +15,7 @@ window.LivewireUIModal = () => {
         },
         closeModalOnEscape(trigger) {
 
-            if (this.getActiveComponentModalAttribute('closeOnEscape') === false) {
+            if (this.getActiveComponentModalAttribute('closeOnEscape') === false || this.preventClose) {
                 return;
             }
 
@@ -22,7 +23,7 @@ window.LivewireUIModal = () => {
             this.confirmCloseModal(force);
         },
         closeModalOnClickAway(trigger) {
-            if (this.getActiveComponentModalAttribute('closeOnClickAway') === false) {
+            if (this.getActiveComponentModalAttribute('closeOnClickAway') === false || this.preventClose) {
                 return;
             }
 
@@ -118,7 +119,7 @@ window.LivewireUIModal = () => {
         },
         focusables() {
             let selector = 'a, button, textarea, select, details, input:not([type=\'hidden\'], [tabindex]:not([tabindex=\'-1\'])'
-            
+
             return [...this.$el.querySelectorAll(selector)]
                 .filter(el => !el.hasAttribute('disabled'))
         },
@@ -163,6 +164,10 @@ window.LivewireUIModal = () => {
             Livewire.on('setDirty', (id, value) => {
                 this.isDirty = value;
             });
+
+            Livewire.on('preventClose', (value) => {
+                this.preventClose = value;
+            })
 
             Livewire.on('setCloseConfirmationText',  (id, value) => {
                 this.closeConfirmationText = value;
