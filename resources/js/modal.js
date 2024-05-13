@@ -144,6 +144,8 @@ window.LivewireUIModal = () => {
         setShowPropertyTo(show) {
             this.show = show;
 
+            this.$dispatch('onModalChange', {show: this.show});
+
             if (show) {
                 document.body.classList.add('overflow-y-hidden');
             } else {
