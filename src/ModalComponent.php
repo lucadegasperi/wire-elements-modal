@@ -58,7 +58,7 @@ abstract class ModalComponent extends Component implements Contract
 
     public function closeModal(): void
     {
-        $this->emit('closeModal', $this->forceClose, $this->skipModals, $this->destroySkipped);
+        $this->dispatch('closeModal', force: $this->forceClose, skipPreviousModals: $this->skipModals, destroySkipped: $this->destroySkipped);
     }
 
     public function closeModalWithEvents(array $events): void
@@ -69,7 +69,7 @@ abstract class ModalComponent extends Component implements Contract
 
     public static function modalMaxWidth(): string
     {
-        return config('livewire-ui-modal.component_defaults.modal_max_width', '2xl');
+        return config('wire-elements-modal.component_defaults.modal_max_width', '2xl');
     }
 
     public static function modalMaxWidthClass(): string
@@ -86,27 +86,27 @@ abstract class ModalComponent extends Component implements Contract
 
     public static function closeModalOnClickAway(): bool
     {
-        return config('livewire-ui-modal.component_defaults.close_modal_on_click_away', true);
+        return config('wire-elements-modal.component_defaults.close_modal_on_click_away', true);
     }
 
     public static function closeModalOnEscape(): bool
     {
-        return config('livewire-ui-modal.component_defaults.close_modal_on_escape', true);
+        return config('wire-elements-modal.component_defaults.close_modal_on_escape', true);
     }
 
     public static function closeModalOnEscapeIsForceful(): bool
     {
-        return config('livewire-ui-modal.component_defaults.close_modal_on_escape_is_forceful', true);
+        return config('wire-elements-modal.component_defaults.close_modal_on_escape_is_forceful', true);
     }
 
     public static function dispatchCloseEvent(): bool
     {
-        return config('livewire-ui-modal.component_defaults.dispatch_close_event', false);
+        return config('wire-elements-modal.component_defaults.dispatch_close_event', false);
     }
 
     public static function destroyOnClose(): bool
     {
-        return config('livewire-ui-modal.component_defaults.destroy_on_close', false);
+        return config('wire-elements-modal.component_defaults.destroy_on_close', false);
     }
 
     private function emitModalEvents(array $events): void
@@ -117,9 +117,9 @@ abstract class ModalComponent extends Component implements Contract
             }
 
             if (is_numeric($component)) {
-                $this->emit($event, ...$params ?? []);
+                $this->dispatch($event, ...$params ?? []);
             } else {
-                $this->emitTo($component, $event, ...$params ?? []);
+                $this->dispatch($event, ...$params ?? [])->to($component);
             }
         }
     }

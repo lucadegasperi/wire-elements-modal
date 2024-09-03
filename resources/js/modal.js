@@ -5,9 +5,11 @@ window.LivewireUIModal = () => {
         activeComponent: false,
         componentHistory: [],
         modalWidth: null,
+        listeners: [],
         isDirty: false,
         preventClose: false,
         closeConfirmationText: "Are you sure you want to discard all the changes?",
+
         getActiveComponentModalAttribute(key) {
             if (this.$wire.get('components')[this.activeComponent] !== undefined) {
                 return this.$wire.get('components')[this.activeComponent]['modalAttributes'][key];
@@ -48,18 +50,18 @@ window.LivewireUIModal = () => {
 
             if (this.getActiveComponentModalAttribute('dispatchCloseEvent') === true) {
                 const componentName = this.$wire.get('components')[this.activeComponent].name;
-                Livewire.emit('modalClosed', componentName);
+                Livewire.dispatch('modalClosed', {name: componentName});
             }
 
             if (this.getActiveComponentModalAttribute('destroyOnClose') === true) {
-                Livewire.emit('destroyComponent', this.activeComponent);
+                Livewire.dispatch('destroyComponent', {id: this.activeComponent});
             }
 
             if (skipPreviousModals > 0) {
                 for (var i = 0; i < skipPreviousModals; i++) {
                     if (destroySkipped) {
                         const id = this.componentHistory[this.componentHistory.length - 1];
-                        Livewire.emit('destroyComponent', id);
+                        Livewire.dispatch('destroyComponent', {id: id});
                     }
                     this.componentHistory.pop();
                 }
@@ -67,7 +69,7 @@ window.LivewireUIModal = () => {
 
             const id = this.componentHistory.pop();
 
-            if (id && force === false) {
+            if (id && !force) {
                 if (id) {
                     this.setActiveModalComponent(id, true);
                 } else {
@@ -118,7 +120,7 @@ window.LivewireUIModal = () => {
             });
         },
         focusables() {
-            let selector = 'a, button, textarea, select, details, input:not([type=\'hidden\'], [tabindex]:not([tabindex=\'-1\'])'
+            let selector = 'a, button, input:not([type=\'hidden\'], textarea, select, details, [tabindex]:not([tabindex=\'-1\']))'
 
             return [...this.$el.querySelectorAll(selector)]
                 .filter(el => !el.hasAttribute('disabled'))
@@ -161,24 +163,39 @@ window.LivewireUIModal = () => {
 
             this.modalWidth = this.getActiveComponentModalAttribute('maxWidthClass');
 
-            Livewire.on('setDirty', (id, value) => {
-                this.isDirty = value;
-            });
+            this.listeners.push(
+                Livewire.on('setDirty', (data) => {
+                    this.isDirty = data?.value ?? false;
+                })
+            );
 
-            Livewire.on('preventClose', (value) => {
-                this.preventClose = value;
-            })
+            this.listeners.push(
+                Livewire.on('preventClose', (data) => {
+                    this.preventClose = data?.value ?? false;
+                })
+            )
 
-            Livewire.on('setCloseConfirmationText',  (id, value) => {
-                this.closeConfirmationText = value;
-            });
+            this.listeners.push(
+                Livewire.on('setCloseConfirmationText', (data) => {
+                    this.closeConfirmationText = data?.value ?? '';
+                })
+            );
 
-            Livewire.on('closeModal', (force = false, skipPreviousModals = 0, destroySkipped = false) => {
-                this.confirmCloseModal(force, skipPreviousModals, destroySkipped);
-            });
+            this.listeners.push(
+                Livewire.on('closeModal', (data) => {
+                    this.confirmCloseModal(data?.force ?? false, data?.skipPreviousModals ?? 0, data?.destroySkipped ?? false);
+                })
+            );
 
-            Livewire.on('activeModalComponentChanged', (id) => {
-                this.setActiveModalComponent(id);
+            this.listeners.push(
+                Livewire.on('activeModalComponentChanged', ({id}) => {
+                    this.setActiveModalComponent(id);
+                })
+            );
+        },
+        destroy() {
+            this.listeners.forEach((listener) => {
+                listener();
             });
         }
     };
